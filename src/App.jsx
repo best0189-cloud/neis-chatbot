@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 
 // ✅ 여기에 Gemini API 키를 직접 입력하세요
-const GEMINI_API_KEY = "AIzaSyCUaS2xwcNlfDG3UkCMKqFBWBuGFWl1ah0";
+const GEMINI_API_KEY = "AQ.Ab8RN6L4RhxErgYKuvTU_NT7O6dUxbyx4Lcyt4vI7C10sad7_A";
 
 const SYSTEM_PROMPT = `당신은 2025학년도 경기도 초등학교용 나이스(NEIS) 교무업무 매뉴얼을 기반으로 학교 교직원의 질문에 답변하는 친절한 도우미입니다.
 
