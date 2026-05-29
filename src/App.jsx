@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 
-// ✅ 여기에 Gemini API 키를 직접 입력하세요
-const GEMINI_API_KEY = "AQ.Ab8RN6L4RhxErgYKuvTU_NT7O6dUxbyx4Lcyt4vI7C10sad7_A";
+// ✅ 여기에 Anthropic API 키를 입력하세요
+const ANTHROPIC_API_KEY = "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";
 
 const SYSTEM_PROMPT = `당신은 2025학년도 경기도 초등학교용 나이스(NEIS) 교무업무 매뉴얼을 기반으로 학교 교직원의 질문에 답변하는 친절한 도우미입니다.
 
@@ -130,28 +130,30 @@ export default function App() {
     setLoading(true);
 
     try {
-      // 대화 내용 구성
-      const contents = [
-        { role: "user", parts: [{ text: SYSTEM_PROMPT }] },
-        { role: "model", parts: [{ text: "네, 2025학년도 경기도 초등학교 나이스 교무업무 매뉴얼을 기반으로 친절하게 답변드리겠습니다." }] },
-        ...next.slice(1).map(m => ({
-          role: m.role === "assistant" ? "model" : "user",
-          parts: [{ text: m.content }]
-        }))
-      ];
+      const apiMessages = next.slice(1).map(m => ({
+        role: m.role,
+        content: m.content
+      }));
 
-      // Gemini API 직접 호출
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contents })
-        }
-      );
+      // Anthropic API 직접 호출
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": ANTHROPIC_API_KEY,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true"
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          system: SYSTEM_PROMPT,
+          messages: apiMessages
+        })
+      });
 
       const data = await res.json();
-      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "응답을 받지 못했습니다.";
+      const reply = data.content?.[0]?.text || "응답을 받지 못했습니다.";
       setMsgs(p => [...p, { role: "assistant", content: reply }]);
     } catch {
       setMsgs(p => [...p, {
