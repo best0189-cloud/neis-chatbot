@@ -1,8 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 
-// ✅ 여기에 Anthropic API 키를 입력하세요
-const ANTHROPIC_API_KEY = "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";
-
 const SYSTEM_PROMPT = `당신은 2025학년도 경기도 초등학교용 나이스(NEIS) 교무업무 매뉴얼을 기반으로 학교 교직원의 질문에 답변하는 친절한 도우미입니다.
 
 아래는 매뉴얼의 핵심 내용입니다:
@@ -135,26 +132,19 @@ export default function App() {
         content: m.content
       }));
 
-      // Anthropic API 직접 호출
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      // ✅ Vercel api/chat.js 를 통해 안전하게 호출
+      const res = await fetch("/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
           system: SYSTEM_PROMPT,
           messages: apiMessages
         })
       });
 
+      if (!res.ok) throw new Error(`오류: ${res.status}`);
       const data = await res.json();
-      const reply = data.content?.[0]?.text || "응답을 받지 못했습니다.";
-      setMsgs(p => [...p, { role: "assistant", content: reply }]);
+      setMsgs(p => [...p, { role: "assistant", content: data.reply }]);
     } catch {
       setMsgs(p => [...p, {
         role: "assistant",
